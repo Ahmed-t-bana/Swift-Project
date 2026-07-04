@@ -1,0 +1,145 @@
+import Foundation
+
+protocol Identifiable {
+    var id: Int { get }
+}
+
+protocol Trackable {
+    var location: String { get set }
+}
+
+class Person: Identifiable, Trackable {
+    let id: Int
+    var name: String
+    var location: String = "Not Assigned"
+    
+    init(id: Int, name: String) {
+        self.id = id
+        self.name = name
+    }
+    
+    func describe() {
+        print("ID: \(id), Name: \(name), Location: \(location)")
+    }
+}
+
+class Student: Person {
+    var major: String
+    var gpa: Double
+    var enrollments: [Enrollment] = []
+    
+    init(id: Int, name: String, major: String, gpa: Double) {
+        self.major = major
+        self.gpa = gpa
+        super.init(id: id, name: name)
+    }
+}
+
+class Professor: Person {
+    var speciality: String
+    var salary: Double
+    var courses: [Course] = []
+    
+    init(id: Int, name: String, speciality: String, salary: Double, location: String) {
+        self.speciality = speciality
+        self.salary = salary
+        super.init(id: id, name: name)
+        self.location = location
+    }
+}
+
+class Course {
+    let courseId: Int
+    var title: String
+    var credits: Int
+    var assignments: [Assignment] = []
+    
+    init(courseId: Int, title: String, credits: Int) {
+        self.courseId = courseId
+        self.title = title
+        self.credits = credits
+    }
+}
+
+class Enrollment {
+    let eId: Int
+    var semester: String
+    var grade: String
+    weak var student: Student?
+    var course: Course
+    
+    init(enrollmentId: Int, semester: String, grade: String, student: Student, course: Course) {
+        self.eId = enrollmentId
+        self.semester = semester
+        self.grade = grade
+        self.student = student
+        self.course = course
+    }
+}
+
+class Assignment {
+    let id: Int
+    var title: String
+    var dueDate: Date
+    var submissions: [Submission] = []
+    
+    init(id: Int, title: String, dueDate: Date) {
+        self.id = id
+        self.title = title
+        self.dueDate = dueDate
+    }
+}
+
+class Submission {
+    let id: Int
+    var fileName: String
+    var submittedAt: Date
+    
+    init(id: Int, fileName: String, submittedAt: Date) {
+        self.id = id
+        self.fileName = fileName
+        self.submittedAt = submittedAt
+    }
+}
+
+class UniversitySystem {
+    private static var instance: UniversitySystem?
+    
+    var students = [Student]()
+    var professors = [Professor]()
+    var courses = [Course]()
+    
+    private init() {}
+    
+    static func sharedSystem() -> UniversitySystem {
+        if instance == nil {
+            instance = UniversitySystem()
+        }
+        return instance!
+    }
+}
+
+let uniManager = UniversitySystem.sharedSystem()
+
+let p1 = Professor(id: 991, name: "Dr. Khaled", speciality: "SE", salary: 4500, location: "Lab 4")
+let s1 = Student(id: 1102, name: "Ahmad Albana", major: "CS", gpa: 4.50)
+let c1 = Course(courseId: 101, title: "iOS App", credits: 3)
+
+uniManager.professors.append(p1)
+uniManager.students.append(s1)
+uniManager.courses.append(c1)
+
+p1.courses.append(c1)
+
+let currentEnrollment = Enrollment(enrollmentId: 7001, semester: "Spring 2026", grade: "B+", student: s1, course: c1)
+s1.enrollments.append(currentEnrollment)
+
+let hw1 = Assignment(id: 401, title: "Swift Basics Homework", dueDate: Date())
+c1.assignments.append(hw1)
+
+let sub1 = Submission(id: 501, fileName: "assignment1.swift", submittedAt: Date())
+hw1.submissions.append(sub1)
+
+print("System loaded successfully.")
+print("Course title check: \(uniManager.courses.first?.title ?? "No course found")")
+print("Student enrolled: \(uniManager.students.first?.name ?? "") with GPA \(s1.gpa)")
